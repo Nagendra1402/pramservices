@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>KnockOut</title>
+<link rel="stylesheet" href="resources/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="resources/css/bootstrap-theme.min.css"/>
+
+<script type="text/javascript" src="resources/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="resources/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/js/knockout-3.2.0.js"></script>
+<script type="text/javascript">
+$( document ).ready( function() {
+	
+	function seatReservation(name,meal){
+		var self = this;
+		self.name=name;
+		self.meal=ko.observable(meal);
+	}
+	 function ReservationViewModel(){
+		 var self = this;
+		 self.passengerName=ko.observable();
+		 self.mealName=ko.observable();
+		 self.mealPrice=ko.observable();
+		 
+		 self.availableMeals=[   { mealName: "Standard (sandwich)", price: 0 },
+	                         { mealName: "Premium (lobster)", price: 34.95 },
+	                         { mealName: "Ultimate (whole zebra)", price: 290 }
+	                     ];  
+		 self.seats=ko.observableArray([
+	                                new seatReservation("Nagendra",self.availableMeals[0]),
+	                                new seatReservation("Nag",self.availableMeals[1])
+	                    ]);
+		 self.cancelSeat=function(seat){
+			 self.seats.remove(seat);
+		 }
+		 self.reserveSeat = function(){
+			 this.availableMeals.push( { mealName: this.mealName(), price: this.mealPrice() })	
+			 var length=self.availableMeals.length;
+			 self.seats.push(new seatReservation(this.passengerName(),self.availableMeals[length-1]));
+			 this.mealName("");
+			 this.mealPrice("");
+			 this.passengerName("");
+			 
+		 }
+		 
+	 }
+	 ko.applyBindings(new ReservationViewModel());
+} )
+
+</script>
+</head>
+
+<body>
+ <form>
+  <table>
+   <tr><td>Passenger Name</td><td><input data-bind="value: passengerName" /></td></tr>
+   <tr><td>Meal Name</td><td><input data-bind="value: mealName" /></td></tr>
+   <tr><td>price</td><td><input data-bind="value: mealPrice" /></td></tr>
+  </table>
+ </form>
+ <table class="table table-condensed">
+  <thead>
+   <tr>
+    <th>Passenger Name</th>
+    <th>Meal Name</th>
+    <th>price</th>
+   </tr>
+  </thead>
+  <tbody data-bind="foreach: seats">
+   <tr>
+    <td data-bind="text: name"></td>
+   <!--  <td><select data-bind="options: $root.availableMeals, value: meal, optionsText: 'mealName'"></select></td> -->
+    <td data-bind="text: meal().mealName"></td>
+    <td data-bind="text: meal().price"></td>
+    <td>
+    <a class="btn btn-danger dropdown-toggle" data-toggle="dropdown" href="#" data-bind="click: $root.cancelSeat"><span>cancel&nbsp;</span><b class="glyphicon glyphicon-cog"></b></a>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <a class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#" data-bind="click: reserveSeat"><span>Reserve Seat &nbsp;</span><b class="glyphicon glyphicon-cog"></b></a>
+</body>
+</html>
