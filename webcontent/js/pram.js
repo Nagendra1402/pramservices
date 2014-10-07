@@ -2,8 +2,12 @@ $(document).ready(function(){
 	
 	//date picker
     $('.input-daterange').datepicker({
-    	format: "yyyy-mm-dd",
+    	  format: "yyyy-mm-dd",
     	  autoclose: true,
+    	  todayHighlight: true,
+    	  todayBtn: true,
+    	  calendarWeeks: true,
+    	  daysOfWeekDisabled: "5,6",
     });
     
     //Group Details
@@ -22,8 +26,8 @@ $(document).ready(function(){
 		this.endDate=ko.observable(project.endDate);
 		this.status=ko.observable(project.status);
 		
-		this.statusCompletion=ko.computed(function(){
-			return this.status()+"%";
+		this.computedStatus=ko.computed(function(){
+		 return this.status()+"%";	
 		},this);
 	}
 	
@@ -50,6 +54,9 @@ $(document).ready(function(){
 		        return itemToTest== self.editingProject();
 		 };
 		
+		//Loader image
+		$('.holder').append('<div id="loading"><div class="loaderbg"></div><div class="loader"></div></div>');
+        	
 		$.ajax({
 			type:'GET',
 			url:'pram/service/application',
@@ -64,7 +71,7 @@ $(document).ready(function(){
 		        
 			},
 			error:function(data){
-				
+				 $('#loading').remove();
 			}
       
 		});
@@ -74,7 +81,7 @@ $(document).ready(function(){
 			
 			self.selectedAppId(appId);
 			self.selectedAppName(appName);
-			
+        	
 			$.ajax({
 				type:'GET',
 				url:'pram/service/project/' +appId,
@@ -84,7 +91,11 @@ $(document).ready(function(){
 				success:function(data){
 	              var mappedProjects = $.map(data, function(project) { return new projectDetails(project);});
 			        self.projects(mappedProjects);
-				}
+			        $('#loading').remove();  
+				},
+			   error:function(data){
+				   $('#loading').remove(); 
+			}
 			});
 		}
 
@@ -93,6 +104,9 @@ $(document).ready(function(){
 			
 			self.selectedAppId(event.target.value);
 			self.selectedAppName(event.target.text);
+			
+			$('body').append('<div id="loading"><div class="loaderbg"></div><div class="loader"></div></div>');
+	        $('.loaderbg').css('height',$('.panel').height());
 
 		     $.ajax({
 			 type:'GET',
@@ -102,9 +116,11 @@ $(document).ready(function(){
 			 success:function(data){
 				 var mappedProjects = $.map(data, function(project) { return new projectDetails(project);});
 			        self.projects(mappedProjects);
+			        
+			      $("#loading").remove();
 			},
 			error:function(data){
-				
+				$("#loading").remove();
 			}
       
 		});
@@ -112,15 +128,18 @@ $(document).ready(function(){
 		
 		//create new project
 		self.addProject=function(data, event){
+			
            var params=new Object();
            params.appId=self.selectedAppId(),
            params.projectName=self.newProjectName(),
-           params.projectDesciption=this.newProjectDesc();
-           params.startDate=this.newStartDate();
-           params.endDate=this.newEndDate();
+           params.projectDesciption=self.newProjectDesc();
+           params.startDate=self.newStartDate();
+           params.endDate=self.newEndDate();
            params.status=1;
-           
            var jsonData=ko.toJSON(params);
+           
+			$('.holder').append('<div id="loading"><div class="loaderbg"></div><div class="loader"></div></div>');
+	        $('.loaderbg').css('height',$('.panel').height());
            
 		   $.ajax({
 			 type:'POST',
@@ -129,10 +148,18 @@ $(document).ready(function(){
 			 contentType:'application/json',
 			 data:jsonData,
 			 success:function(data){ 
-				 self.projects.push(data);
+				 self.projects.push(new projectDetails(data));
+				 self.newProjectName("");
+				 self.newProjectDesc("");
+				 self.newStartDate("");
+				 self.newEndDate("");
+				 $("#loading").remove();
+				 
+				 alert("project details has been added successfully");
+				 
 			},
 			error:function(data){
-				
+				$("#loading").remove();
 			}
 		  
 		});
@@ -161,8 +188,8 @@ $(document).ready(function(){
 						
 					} else {
 						 self.selectedProject(null);
-					}	  
-			 }
+					}  
+			 };
 		};
 		
 		self.editProject=function(project){
@@ -172,8 +199,12 @@ $(document).ready(function(){
 		};
 		
 		self.saveProject = function(project){
-			
-	         var jsonData=ko.toJSON(project);
+	         
+	         var jsonData= ko.toJSON(project,function(key,value){
+	        	 if (key=="computedStatus")
+	        		 return undefined;
+	        	 return value;
+	         });
 	         
 	         $.ajax({
 				 type:'PUT',
@@ -182,9 +213,8 @@ $(document).ready(function(){
 				 contentType:'application/json',
 				 data:jsonData,
 				 success:function(data){
-					 
 					 var projectIndex = self.projects.indexOf(project);
-					 self.projects.splice(projectIndex,1,data);
+					 self.projects.splice(projectIndex,1,new projectDetails(data));
 					 self.editingProject(null);
 					 alert("Project has been successfully updated");
 				},
@@ -198,11 +228,25 @@ $(document).ready(function(){
 	
 			   self.cancelEdit = function (project) {   
 				   
+				   alert(ko.toJSON(project));
 				   if(confirm("Do you want cancel editing?")){
-				        //  hides the edit fields
+					   
 					   self.editingProject(null);
 				   }
 			    };
+			    
+				self.checkStatus=function(project,event){
+					
+					var inputVal= event.target.value;
+					if(event.target.value>100){
+						alert("Enter value less than 100");
+						project.status('100');	
+					}
+					 if(inputVal.match(/[a-zA-Z$.@]$/))
+					    {
+					       alert("Please Enter Valid Number");
+					    }
+				};
 		
 	}
 	
