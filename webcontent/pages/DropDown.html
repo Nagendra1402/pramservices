@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project</title>
+<link rel="stylesheet" href="resources/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="resources/css/bootstrap-theme.min.css"/>
+<link rel="stylesheet" href="resources/css/style.css"/>
+<link rel="stylesheet" href="resources/css/datepicker.css"/>
+
+<script type="text/javascript" src="resources/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="resources/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/js/bootstrap-datepicker.js"></script>
+<script type="text/javascript" src="resources/js/knockout-3.2.0.js"></script>
+<script type="text/javascript" src="resources/js/knockout.validation.min.js"></script>
+<script type="text/javascript" src="resources/js/respond.js"></script>
+<script type="text/javascript" src="resources/js/pram.js"></script>
+</head>
+
+<body>
+<div>
+ <div class="header navbar navbar-default">
+  <div id="head" class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <span class="navbar-brand" href="#">PRAM TOOL</span>
+    </div>
+   <div class="navbar-collapse collapse navbar-right">
+	<ul class="nav navbar-nav" id="topNav">
+	 <li class="dropdown" title="Select application" id="applicationSelection">
+	  <a data-toggle="dropdown" class="dropdown-toggle" role="button" href="javascript:void(0);" id="applications"><span class="selectedApp" data-bind="text: selectedAppName"></span><b class="glyphicon glyphicon-cog"></b></a>
+	   <ul aria-labelledby="applications" role="menu" class="dropdown-menu" data-bind="foreach: applicationGroups">
+		<li><a href="javascript:void(0);" data-bind="text: $data.appName ,value: appId , click: $root.listProjects"></a></li>
+	   </ul>
+	</li>
+   </ul>
+  </div>
+ </div>
+</div>
+</div>
+<div class="holder">			
+  <div class="maincontainer">			
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<span>Projects</span>
+			<button type="button" class="btn" data-toggle="modal" data-target="#createProject">Add Project Details</button>
+		</div>
+			  <table class='table'>
+			   <thead>
+			    <tr>
+			     <th>Project Name</th>
+			     <th>Project Description</th>
+			     <th>Start Date</th>
+			     <th>End Date</th>
+			     <th>Status</th>
+			    </tr>
+			   </thead>
+			   <tbody data-bind="foreach: projects">
+			    <tr data-bind="css: {'selected':$root.selectedProject() == $data}">
+			     <td>
+			      <input type="text" id="projectname" data-bind="textInput: projectName, visible: $root.isItemEditing($data)" />
+			      <span class="read" data-bind="text: projectName, visible: !$root.isItemEditing($data)"></span>
+			     </td>
+			     <td>
+			      <textarea data-bind="value: projectDesciption, visible: $root.isItemEditing($data)" id="projectdesc"></textarea>
+			      <span class="read" data-bind="text: projectDesciption, visible: !$root.isItemEditing($data)"></span>
+			     </td>
+			     <td data-bind="text: startDate,value: startDate"></td>
+			     <td data-bind="text: endDate,value: endDate"></td>
+			     <td>
+			     <input type="text" id="status" data-bind="value: status, visible: $root.isItemEditing($data) ,event:{ keyup: $root.checkStatus.bind($root)}"/>
+			     <!-- <progress class="read" data-bind="value: status,visible: !$root.isItemEditing($data)" max="100">
+			      <span data-bind="text: status"></span>
+			     </progress>-->
+			      <div class="progress" data-bind="visible: !$root.isItemEditing($data)">
+					<div class="progress-bar" role="progressbar"  aria-valuemin="0" aria-valuemax="100"  data-bind="text: computedStatus, style: {width:computedStatus}">
+					</div>
+				 </div>
+			     </td>
+			     <td>
+			      <button data-bind="click: $root.saveProject.bind($root), style: {color : 'green'} , visible: $root.isItemEditing($data)" title="save project" ><b class="glyphicon glyphicon-save">Save</b></button>
+                  <button data-bind="click: $root.editProject.bind($root), style: {color : 'green'} , visible: !$root.isItemEditing($data)" title="Edit project" ><b class="glyphicon glyphicon-edit">Edit</b></button>
+                 </td>
+			     <td>
+			      <button data-bind="value: projectId,click: $root.removeProject.bind($root), style: {color : 'red'} ,visible: !$root.isItemEditing($data)" title="Remove project" ><b class="glyphicon glyphicon-remove">Project</b></button>
+			      <button data-bind="click: $root.cancelEdit.bind($root), style: {color : 'red'} , visible: $root.isItemEditing($data)" title="cancel editing" ><b class="glyphicon glyphicon-remove">Cancel</b></button>
+			     </td>
+			    </tr>
+			   </tbody>
+			  </table>
+			</div>
+	</div>
+</div>
+<p>
+	 <b> Select group</b><select data-bind='options: applicationGroups, optionsText: "appName", optionsCaption: "Select...", value: "appId",selectedOptions:selectedGroup,event:{change:$root.list}'> </select>
+</p>
+<p data-bind="visible:selectedGroup">
+ <b> Select project</b><select data-bind='options: projects, optionsText: "projectName", optionsCaption: "Select...", value: "projectName"'> </select>
+</p>
+<div class="footer">
+ <p>&copy; 2014, Developed by Nagendra</p>
+</div>		
+<div class="modal fade" id="createProject" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Add Project</h4>
+      </div>
+      <div class="modal-body">
+        <form role="form"name="create_project_form">
+				<div class="form-group">
+					<label for="projectName">Project Name</label>
+					<input data-bind="value: newProjectName"/>
+				</div>
+				<div class="form-group">
+					<label for="projectDesc">Description</label>
+					<textarea class="form-control" rows="3"  data-bind="value: newProjectDesc"></textarea>
+				</div>
+				<div class="clear"></div>
+				<div class="input-daterange" id="datepicker">
+					<label class="col-sm-2 control-label" for="startDate">Date</label>
+						<input class="input-small" name="start" data-bind="value: newStartDate" />
+                 <label class="add-on">to</label>
+						<input class="input-small" name="end"  data-bind="value: newEndDate" />
+				</div>
+				<div class="clear"></div>
+			</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" data-bind="click: $root.addProject">Save</button>
+      </div>
+    </div>
+  </div>
+</div>			
+</body>
+</html>
