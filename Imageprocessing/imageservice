@@ -1,0 +1,22 @@
+@POST
+	@Path("/upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response putImage(
+	           @FormDataParam("file") InputStream fileInputStream,
+	           @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) throws SQLException{
+		String filePath = SERVER_UPLOAD_LOCATION_FOLDER + contentDispositionHeader.getFileName();
+        detailsDao.saveFile(fileInputStream);
+		 String output = "File saved to server location : " + filePath;
+		 return Response.status(200).entity(output).build();
+		
+	}
+	@GET
+	@Path("/download")
+	@Produces(MediaType.MULTIPART_FORM_DATA)
+	public Response getImage() throws SQLException{
+		String filePath = SERVER_UPLOAD_LOCATION_FOLDER;
+        detailsDao.getFile(filePath);
+		 String output = "File saved to server location : " + filePath;
+		 return Response.status(200).entity(output).build();
+		
+	}
