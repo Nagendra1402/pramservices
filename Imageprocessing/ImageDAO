@@ -1,0 +1,43 @@
+	   public void saveFile(InputStream uploadedInputStream) throws SQLException {
+	     try {
+			helper.connectionDetails();
+		     PreparedStatement pstmt=helper.getConnection().prepareStatement("insert into images values(?)");
+		     
+		     pstmt.setBinaryStream(1, uploadedInputStream);
+		     pstmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	     finally{
+	    	 helper.getConnection().close();
+	     }
+    }
+	   public void getFile(String filepath){
+		   
+		   try {
+			helper.connectionDetails();
+			Statement stmt=helper.getConnection().createStatement();
+			ResultSet rs=stmt.executeQuery("select imagename from images");
+			int i=0;
+			while (rs.next()) {
+				InputStream in = rs.getBinaryStream(1);
+				OutputStream f = new FileOutputStream(new File(filepath+"/test"+i+".jpg"));
+				i++;
+				int c = 0;
+				while ((c = in.read()) > -1) {
+				f.write(c);
+				}
+				f.close();
+				in.close();
+				}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		   catch(Exception ex){
+				System.out.println(ex.getMessage());
+				}
+		   
+	   }
