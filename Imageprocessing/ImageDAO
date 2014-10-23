@@ -1,9 +1,10 @@
-	   public void saveFile(InputStream uploadedInputStream) throws SQLException {
+public void saveFile(InputStream uploadedInputStream,String fileName) throws SQLException {
 	     try {
 			helper.connectionDetails();
-		     PreparedStatement pstmt=helper.getConnection().prepareStatement("insert into images values(?)");
+		     PreparedStatement pstmt=helper.getConnection().prepareStatement("insert into images values(?,?)");
 		     
-		     pstmt.setBinaryStream(1, uploadedInputStream);
+		     pstmt.setString(1,fileName);
+		     pstmt.setBinaryStream(2, uploadedInputStream);
 		     pstmt.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
