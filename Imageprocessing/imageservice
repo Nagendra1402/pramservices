@@ -1,4 +1,4 @@
-@POST
+        @POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response putImage(
@@ -11,12 +11,12 @@
 		 return Response.status(200).entity(output).build();
 		
 	}
-	@GET
+        @GET
 	@Path("/download")
-	@Produces(MediaType.MULTIPART_FORM_DATA)
+	@Produces({"image/png", "image/jpeg", "image/gif"})
 	public Response getImage() throws SQLException{
 		String filePath = SERVER_UPLOAD_LOCATION_FOLDER;
-        detailsDao.getFile(filePath);
+		imageDao.getFile(filePath);
 		 String output = "File saved to server location : " + filePath;
 		 return Response.status(200).entity(output).build();
 		
