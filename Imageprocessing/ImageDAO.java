@@ -29,8 +29,8 @@ public class ImageDAO {
 			     PreparedStatement pstmt=helper.getConnection().prepareStatement("insert into images values(?,?,?)");
 			     InputStream uploadedInputStream= new FileInputStream(file);
 			     String imageSize= (int)file.length()/1024+"kb";
-			     pstmt.setString(1,fileName);
-			     pstmt.setString(2, imageSize);
+			     pstmt.setString(1, imageSize);
+			     pstmt.setString(2,fileName);
 			     pstmt.setBinaryStream(3, uploadedInputStream, (int)file.length());
 			     pstmt.executeUpdate();
 			} catch (SQLException e) {
@@ -42,33 +42,24 @@ public class ImageDAO {
 		     }
 	    }
 		  
-	   public void getFile(String filepath){
-			   
-			   try {
+	   public File getFile(int imageId) throws SQLException, IOException{
+			
 				helper.connectionDetails();
 				Statement stmt=helper.getConnection().createStatement();
-				ResultSet rs=stmt.executeQuery("select fullimage from images");
-				int i=0;
-				while (rs.next()) {
-					InputStream in = rs.getBinaryStream(1);
-					OutputStream f = new FileOutputStream(new File(filepath+"/test"+i+".jpg"));
-					i++;
+				ResultSet rs=stmt.executeQuery("select image_name,fullimage from images where image_id="
+				+imageId+"");
+                    rs.next();
+				    String fileName=rs.getString(1); 
+				    File file = new File(fileName); 
+					InputStream in = rs.getBinaryStream(2);
+					OutputStream f = new FileOutputStream(file);
 					int c = 0;
 					while ((c = in.read()) > -1) {
 					f.write(c);
 					}
-					logger.info(c);
 					f.close();
-					in.close();
-					}
-
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			   catch(Exception ex){
-					System.out.println(ex.getMessage());
-			}	   
+					in.close();	
+			return file;
 	  }
 	  
 	   public List<ImageBean> getImageDetails(){
